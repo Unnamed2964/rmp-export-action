@@ -16,7 +16,8 @@ async function run(): Promise<void> {
   const exportId = core.getInput("export-id") || undefined;
   const dryRun = core.getInput("dry-run") === "true";
 
-  const configPath = resolve(process.cwd(), configInput);
+  const workspace = process.env.GITHUB_WORKSPACE ?? process.cwd();
+  const configPath = resolve(workspace, configInput);
   const { config, repoRoot } = loadConfig(configPath);
   const values = buildPlaceholderValues(version);
 

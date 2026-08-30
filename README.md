@@ -1,6 +1,6 @@
 # rmp-export-action
 
-![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-node20-2088FF?logo=githubactions&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-composite-2088FF?logo=githubactions&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-Chromium-2EAD33?logo=playwright&logoColor=white)
 ![RMP](https://img.shields.io/badge/Rail%20Map%20Painter-pinned%20ref-0066CC)
@@ -137,14 +137,9 @@ npm ci
 npm run build
 ```
 
-GitHub Actions loads `dist/action.js` from the tagged release. **Commit `dist/` when publishing a version tag**, or CI consumers will not find the compiled entry.
+GitHub Actions uses a **composite** action: the tagged release runs `npm ci` in the action checkout, then `node dist/action.js`. **Commit `dist/` and `package-lock.json` when publishing a version tag.** Consumers reference `Unnamed2964/rmp-export-action@v0` or `@v0.1.x`.
 
-Suggested release flow:
-
-1. Bump version in `package.json`
-2. `npm run build`
-3. Commit `dist/` + tag `v0.1.0`
-4. Push tag; reference `Unnamed2964/rmp-export-action@v0.1.0` or `@v0`
+Tagging this repository does **not** run workflows in consumer map repos — each consumer defines its own triggers (e.g. `workflow_dispatch`).
 
 ## Caching
 
