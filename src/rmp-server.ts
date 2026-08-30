@@ -7,7 +7,6 @@ export interface RmpServerOptions {
   ref: string;
   cacheRoot: string;
   host?: string;
-  port?: number;
 }
 
 export interface RmpServerHandle {
@@ -64,7 +63,7 @@ export async function startRmpServer(
   options: RmpServerOptions,
 ): Promise<RmpServerHandle> {
   const host = options.host ?? "127.0.0.1";
-  const port = options.port ?? 5173;
+  const port = 5173;
   const cacheDir = join(options.cacheRoot, sanitizeRef(options.ref));
 
   if (!existsSync(cacheDir)) {

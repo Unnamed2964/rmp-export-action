@@ -165,7 +165,7 @@ export function applyWatermark(svgPath, frame, config, geometry) {
     const { x, y } = computeTranslateFromInset(frame, config, geometry);
     let svg = readFileSync(svgPath, "utf-8");
     if (!RMP_INFO_RE.test(svg)) {
-        console.warn(`watermark: ${config.selector} not found, skipping`);
+        console.warn("watermark: #rmp_info not found, skipping");
         return;
     }
     svg = svg.replace(RMP_INFO_RE, `$1translate(${x}, ${y})$2`);

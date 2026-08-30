@@ -230,7 +230,7 @@ export function applyWatermark(
   let svg = readFileSync(svgPath, "utf-8");
 
   if (!RMP_INFO_RE.test(svg)) {
-    console.warn(`watermark: ${config.selector} not found, skipping`);
+    console.warn("watermark: #rmp_info not found, skipping");
     return;
   }
 

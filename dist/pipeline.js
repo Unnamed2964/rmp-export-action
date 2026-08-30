@@ -31,7 +31,6 @@ export async function runPipeline(options) {
         repository: config.rmp.repository,
         ref: config.rmp.ref,
         cacheRoot,
-        port: config.rmp.port,
     });
     try {
         for (const target of targets) {

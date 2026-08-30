@@ -68,12 +68,10 @@ placeholders:
 rmp:
   repository: https://github.com/railmapgen/rmp.git
   ref: rmp-6.0.22
-  port: 12011
 
 defaults:
   scale: 2.0
   whiteBackground: true
-  formats: [svg, webp]
 
 exports:
   - id: map
@@ -82,8 +80,7 @@ exports:
       svg: RMP.svg
       webp: RMP.webp
     crop: { x, y, width, height }      # optional: viewBox crop
-    watermark:
-      selector: "#rmp_info"
+    watermark:                           # optional: reposition RMP #rmp_info watermark
       anchor: bottom-right             # or top-left, top-right, bottom-left
       inset:                           # viewBox edge → watermark bbox edge
         x: 27                          # margin from right (bottom-right anchor)
@@ -93,6 +90,8 @@ exports:
         - type: command
           run: python scripts/my_hook.py RMP.svg
 ```
+
+Output formats are determined by `exports[].outputs`: include `svg` and/or `webp` paths. WebP rasterization uses `defaults.scale` and `defaults.whiteBackground`.
 
 Pipeline order per export: RMP Playwright export → crop → measure watermark geometry (once) → watermark by inset → in-frame ensure → hooks → WebP rasterize.
 

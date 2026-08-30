@@ -52,7 +52,6 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
     repository: config.rmp.repository,
     ref: config.rmp.ref,
     cacheRoot,
-    port: config.rmp.port,
   });
 
   try {

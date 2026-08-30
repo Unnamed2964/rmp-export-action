@@ -3,7 +3,6 @@ export interface RmpServerOptions {
     ref: string;
     cacheRoot: string;
     host?: string;
-    port?: number;
 }
 export interface RmpServerHandle {
     baseUrl: string;

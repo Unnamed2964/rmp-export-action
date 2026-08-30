@@ -8,14 +8,10 @@ placeholders:
 rmp:
   repository: https://github.com/railmapgen/rmp.git
   ref: rmp-6.0.22
-  port: 12011
 
 defaults:
   scale: 2.0
   whiteBackground: true
-  formats:
-    - svg
-    - webp
 
 exports:
   - id: map
@@ -29,7 +25,6 @@ exports:
       width: 1000
       height: 1000
     watermark:
-      selector: "#rmp_info"
       anchor: bottom-right
       inset:
         x: 27

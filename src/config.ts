@@ -16,7 +16,6 @@ export interface CropRect {
 }
 
 export interface WatermarkConfig {
-  selector: string;
   anchor?: WatermarkAnchor;
   inset?: { x: number; y: number };
   absolute?: { x: number; y: number };
@@ -45,12 +44,10 @@ export interface ReleaseConfig {
   rmp: {
     repository: string;
     ref: string;
-    port?: number;
   };
   defaults: {
     scale: number;
     whiteBackground: boolean;
-    formats: string[];
   };
   exports: ExportTarget[];
 }

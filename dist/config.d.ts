@@ -6,7 +6,6 @@ export interface CropRect {
     height: number;
 }
 export interface WatermarkConfig {
-    selector: string;
     anchor?: WatermarkAnchor;
     inset?: {
         x: number;
@@ -40,12 +39,10 @@ export interface ReleaseConfig {
     rmp: {
         repository: string;
         ref: string;
-        port?: number;
     };
     defaults: {
         scale: number;
         whiteBackground: boolean;
-        formats: string[];
     };
     exports: ExportTarget[];
 }

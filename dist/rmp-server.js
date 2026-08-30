@@ -44,7 +44,7 @@ function prepareDevAssets(cacheDir) {
 }
 export async function startRmpServer(options) {
     const host = options.host ?? "127.0.0.1";
-    const port = options.port ?? 5173;
+    const port = 5173;
     const cacheDir = join(options.cacheRoot, sanitizeRef(options.ref));
     if (!existsSync(cacheDir)) {
         await runCommand("git", [
