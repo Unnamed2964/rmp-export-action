@@ -1,0 +1,36 @@
+# Minimal example for a consumer repository.
+# Place this file at the repository root as rmp-release.yml.
+
+placeholders:
+  version: "%version%"
+  datetime: "%datetime%"
+
+rmp:
+  repository: https://github.com/railmapgen/rmp.git
+  ref: rmp-6.0.22
+  port: 12011
+
+defaults:
+  scale: 2.0
+  whiteBackground: true
+  formats:
+    - svg
+    - webp
+
+exports:
+  - id: map
+    source: RMP.json
+    outputs:
+      svg: RMP.svg
+      webp: RMP.webp
+    crop:
+      x: 0
+      y: 0
+      width: 1000
+      height: 1000
+    watermark:
+      selector: "#rmp_info"
+      anchor: bottom-right
+      inset:
+        x: 27
+        y: 55

@@ -1,0 +1,33 @@
+name: RMP Export
+description: Export Rail Map Painter project JSON to SVG and WebP using a rmp-release.yml config.
+author: Unnamed2964
+
+inputs:
+  config:
+    description: Path to rmp-release.yml (relative to the calling repository root)
+    required: false
+    default: rmp-release.yml
+  version:
+    description: Release version substituted into %version% placeholders (e.g. 0.6.3 or v0.6.3)
+    required: true
+  export-id:
+    description: Export only one target id from the config exports list
+    required: false
+  dry-run:
+    description: Print planned actions without exporting
+    required: false
+    default: "false"
+
+outputs:
+  version:
+    description: Normalized version string written into placeholders
+  datetime:
+    description: Datetime string written into placeholders (Asia/Shanghai)
+
+runs:
+  using: node20
+  main: dist/action.js
+
+branding:
+  icon: map
+  color: blue
