@@ -9,6 +9,24 @@
 
 GitHub Action (and CLI) that exports [Rail Map Painter](https://github.com/railmapgen/rmp) project JSON to SVG and WebP.
 
+## RMP export terms (required)
+
+Automated export drives the RMP **Export image** dialog with Playwright. To download SVG, RMP requires checking **“I agree to the export terms”** (`#agree_terms`). This tool checks that box for you.
+
+**Automation accepts the terms shown in the UI at run time** — not necessarily the copy you read elsewhere (e.g. railmapgen.org, an older RMP tab, or README links).
+
+1. Open the **same RMP version** as `rmp.ref` (run RMP locally or note the tag).
+2. Open **Export image** and read the terms next to `#agree_terms`.
+3. Set in `rmp-release.yml` (must **exactly match** `rmp.ref`):
+
+```yaml
+rmp:
+  ref: rmp-6.0.22
+acceptRmpExportTermsForRef: rmp-6.0.22
+```
+
+Export **fails** if `acceptRmpExportTermsForRef` is missing or differs from `rmp.ref`. Changing `rmp.ref` requires re-reading terms and updating this field. There is no bypass.
+
 Consumer repositories keep a `rmp-release.yml` at the root (see [`example/rmp-release.yml`](example/rmp-release.yml)). The action clones a pinned RMP release, runs it in dev mode, drives the UI with Playwright, then post-processes SVG (crop, watermark, hooks, rasterize).
 
 Repository: [Unnamed2964/rmp-export-action](https://github.com/Unnamed2964/rmp-export-action)
@@ -64,6 +82,8 @@ Minimal shape:
 placeholders:
   version: "%version%"
   datetime: "%datetime%"
+
+acceptRmpExportTermsForRef: rmp-6.0.22   # required — must match rmp.ref
 
 rmp:
   repository: https://github.com/railmapgen/rmp.git

@@ -1,6 +1,10 @@
 # Minimal example for a consumer repository.
 # Place this file at the repository root as rmp-release.yml.
 
+# Read export terms in the RMP export dialog for rmp.ref below, then set the same ref here.
+# Playwright checks #agree_terms on your behalf at run time.
+acceptRmpExportTermsForRef: rmp-6.0.22
+
 placeholders:
   version: "%version%"
   datetime: "%datetime%"

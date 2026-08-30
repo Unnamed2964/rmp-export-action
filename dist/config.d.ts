@@ -32,6 +32,8 @@ export interface ExportTarget {
     skip?: boolean;
 }
 export interface ReleaseConfig {
+    /** Must match rmp.ref: you read export terms for this RMP version in the UI. */
+    acceptRmpExportTermsForRef?: string;
     placeholders: {
         version: string;
         datetime: string;

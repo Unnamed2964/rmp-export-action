@@ -37,6 +37,8 @@ export interface ExportTarget {
 }
 
 export interface ReleaseConfig {
+  /** Must match rmp.ref: you read export terms for this RMP version in the UI. */
+  acceptRmpExportTermsForRef?: string;
   placeholders: {
     version: string;
     datetime: string;
@@ -65,6 +67,20 @@ export function loadConfig(configPath: string): {
   }
   if (!config.rmp?.repository || !config.rmp?.ref) {
     throw new Error("rmp-release.yml: rmp.repository and rmp.ref are required");
+  }
+  if (!config.acceptRmpExportTermsForRef) {
+    throw new Error(
+      "rmp-release.yml: acceptRmpExportTermsForRef is required. " +
+        "Read RMP export terms in the export dialog for your rmp.ref, then set " +
+        "acceptRmpExportTermsForRef to the same value as rmp.ref.",
+    );
+  }
+  if (config.acceptRmpExportTermsForRef !== config.rmp.ref) {
+    throw new Error(
+      `rmp-release.yml: acceptRmpExportTermsForRef (${config.acceptRmpExportTermsForRef}) ` +
+        `must match rmp.ref (${config.rmp.ref}). ` +
+        "Re-read export terms in the UI for the new RMP version and update the config.",
+    );
   }
 
   return { config, repoRoot: resolve(absolute, "..") };
