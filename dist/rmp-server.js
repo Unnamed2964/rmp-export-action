@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
-import { copyFileSync, existsSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { systemExecutable } from "./exec-tool.js";
 function spawnOptions(cwd) {
@@ -65,6 +65,7 @@ function findAvailablePort(host) {
 export async function startRmpServer(options) {
     const host = options.host ?? "127.0.0.1";
     const port = await findAvailablePort(host);
+    mkdirSync(options.cacheRoot, { recursive: true });
     const cacheDir = join(options.cacheRoot, sanitizeRef(options.ref));
     if (!existsSync(cacheDir)) {
         await runCommand("git", [

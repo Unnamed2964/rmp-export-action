@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess, type SpawnOptions } from "node:child_process";
 import { createServer } from "node:net";
-import { copyFileSync, existsSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { systemExecutable } from "./exec-tool.js";
 
@@ -84,6 +84,7 @@ export async function startRmpServer(
 ): Promise<RmpServerHandle> {
   const host = options.host ?? "127.0.0.1";
   const port = await findAvailablePort(host);
+  mkdirSync(options.cacheRoot, { recursive: true });
   const cacheDir = join(options.cacheRoot, sanitizeRef(options.ref));
 
   if (!existsSync(cacheDir)) {

@@ -1,6 +1,6 @@
 {
   "name": "rmp-export-action",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "GitHub Action: export Rail Map Painter JSON to SVG/WebP",
   "type": "module",
   "bin": {
