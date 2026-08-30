@@ -30,17 +30,25 @@ runs:
     - name: Install action dependencies
       shell: bash
       working-directory: ${{ github.action_path }}
-      run: npm ci --omit=dev
+      run: npm ci --omit=dev && npx playwright install chromium
 
     - name: Export via RMP
       shell: bash
-      working-directory: ${{ github.action_path }}
       env:
         INPUT_CONFIG: ${{ inputs.config }}
         INPUT_VERSION: ${{ inputs.version }}
         INPUT_EXPORT_ID: ${{ inputs.export-id }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
-      run: node dist/action.js
+      run: |
+        set -euo pipefail
+        args=(--config "${GITHUB_WORKSPACE}/${INPUT_CONFIG}" --version "${INPUT_VERSION}")
+        if [ -n "${INPUT_EXPORT_ID}" ]; then
+          args+=(--export-id "${INPUT_EXPORT_ID}")
+        fi
+        if [ "${INPUT_DRY_RUN}" = "true" ]; then
+          args+=(--dry-run)
+        fi
+        node "${{ github.action_path }}/dist/cli.js" "${args[@]}"
 
 branding:
   icon: map

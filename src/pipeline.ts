@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import type { ReleaseConfig } from "./config.js";
@@ -12,6 +11,7 @@ import {
   ensureWatermarkInFrame,
   measureRmpInfoGeometry,
 } from "./postprocess/watermark.js";
+import { runHookCommand } from "./exec-tool.js";
 import { startRmpServer } from "./rmp-server.js";
 
 export interface PipelineOptions {
@@ -96,15 +96,7 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
 
       for (const hook of target.postProcess?.hooks ?? []) {
         if (hook.type !== "command") continue;
-        const resolved = resolveHookCommand(hook.run, svgOutput);
-        const result = spawnSync(resolved, {
-          cwd: repoRoot,
-          stdio: "inherit",
-          shell: true,
-        });
-        if (result.status !== 0) {
-          throw new Error(`Hook failed: ${hook.run}`);
-        }
+        runHookCommand(resolveHookCommand(hook.run, svgOutput), repoRoot);
       }
 
       if (target.outputs.webp) {

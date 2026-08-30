@@ -1,7 +1,8 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, type ChildProcess, type SpawnOptions } from "node:child_process";
 import { createServer } from "node:net";
 import { copyFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { systemExecutable } from "./exec-tool.js";
 
 export interface RmpServerOptions {
   repository: string;
@@ -15,17 +16,18 @@ export interface RmpServerHandle {
   stop: () => void;
 }
 
+function spawnOptions(cwd: string): SpawnOptions {
+  return { cwd, stdio: "inherit", shell: false };
+}
+
 function runCommand(
   command: string,
   args: string[],
   cwd: string,
 ): Promise<void> {
+  const executable = systemExecutable(command);
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(command, args, {
-      cwd,
-      stdio: "inherit",
-      shell: process.platform === "win32",
-    });
+    const child = spawn(executable, args, spawnOptions(cwd));
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) resolvePromise();
@@ -109,15 +111,11 @@ export async function startRmpServer(
 
   prepareDevAssets(cacheDir);
 
+  const npm = systemExecutable("npm");
   const dev: ChildProcess | null = spawn(
-    "npm",
+    npm,
     ["run", "dev", "--", "--host", host, "--port", String(port), "--strictPort"],
-    {
-      cwd: cacheDir,
-      stdio: "ignore",
-      shell: process.platform === "win32",
-      detached: process.platform !== "win32",
-    },
+    { ...spawnOptions(cacheDir), stdio: "ignore", detached: process.platform !== "win32" },
   );
 
   const baseUrl = `http://${host}:${port}/rmp/`;

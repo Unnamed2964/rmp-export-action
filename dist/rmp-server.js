@@ -2,13 +2,14 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { copyFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { systemExecutable } from "./exec-tool.js";
+function spawnOptions(cwd) {
+    return { cwd, stdio: "inherit", shell: false };
+}
 function runCommand(command, args, cwd) {
+    const executable = systemExecutable(command);
     return new Promise((resolvePromise, reject) => {
-        const child = spawn(command, args, {
-            cwd,
-            stdio: "inherit",
-            shell: process.platform === "win32",
-        });
+        const child = spawn(executable, args, spawnOptions(cwd));
         child.on("error", reject);
         child.on("close", (code) => {
             if (code === 0)
@@ -83,12 +84,8 @@ export async function startRmpServer(options) {
         await runCommand("npm", installCmd, cacheDir);
     }
     prepareDevAssets(cacheDir);
-    const dev = spawn("npm", ["run", "dev", "--", "--host", host, "--port", String(port), "--strictPort"], {
-        cwd: cacheDir,
-        stdio: "ignore",
-        shell: process.platform === "win32",
-        detached: process.platform !== "win32",
-    });
+    const npm = systemExecutable("npm");
+    const dev = spawn(npm, ["run", "dev", "--", "--host", host, "--port", String(port), "--strictPort"], { ...spawnOptions(cacheDir), stdio: "ignore", detached: process.platform !== "win32" });
     const baseUrl = `http://${host}:${port}/rmp/`;
     await waitForHttp(baseUrl);
     return {

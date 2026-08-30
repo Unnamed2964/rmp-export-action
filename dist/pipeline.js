@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { resolveRepoPath } from "./config.js";
@@ -7,6 +6,7 @@ import { exportSvgViaPlaywright } from "./playwright-export.js";
 import { rasterizeSvg } from "./postprocess/rasterize.js";
 import { applyCropToSvg, parseViewBoxFromFile } from "./postprocess/viewbox.js";
 import { applyWatermark, ensureWatermarkInFrame, measureRmpInfoGeometry, } from "./postprocess/watermark.js";
+import { runHookCommand } from "./exec-tool.js";
 import { startRmpServer } from "./rmp-server.js";
 function resolveHookCommand(run, svgOutput) {
     return run.replace(/\bRMP\.svg\b/g, svgOutput);
@@ -68,15 +68,7 @@ export async function runPipeline(options) {
             for (const hook of target.postProcess?.hooks ?? []) {
                 if (hook.type !== "command")
                     continue;
-                const resolved = resolveHookCommand(hook.run, svgOutput);
-                const result = spawnSync(resolved, {
-                    cwd: repoRoot,
-                    stdio: "inherit",
-                    shell: true,
-                });
-                if (result.status !== 0) {
-                    throw new Error(`Hook failed: ${hook.run}`);
-                }
+                runHookCommand(resolveHookCommand(hook.run, svgOutput), repoRoot);
             }
             if (target.outputs.webp) {
                 await rasterizeSvg({

@@ -137,7 +137,7 @@ npm ci
 npm run build
 ```
 
-GitHub Actions uses a **composite** action: the tagged release runs `npm ci` in the action checkout, then `node dist/action.js`. **Commit `dist/` and `package-lock.json` when publishing a version tag.** Consumers reference `Unnamed2964/rmp-export-action@v0` or `@v0.1.x`.
+GitHub Actions uses a **composite** action: bash installs dependencies in the action checkout (`npm ci`, Playwright Chromium), then runs `node dist/cli.js` with the consumer’s config — same entry as local CLI. **Commit `dist/` and `package-lock.json` when publishing a version tag.** Consumers reference `Unnamed2964/rmp-export-action@v0` or `@v0.1.x`.
 
 Tagging this repository does **not** run workflows in consumer map repos — each consumer defines its own triggers (e.g. `workflow_dispatch`).
 

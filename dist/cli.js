@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+import { appendFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { loadConfig } from "./config.js";
+import { buildPlaceholderValues } from "./placeholders.js";
 import { runPipeline } from "./pipeline.js";
 function parseArgs(argv) {
     let configPath = "rmp-release.yml";
@@ -47,6 +49,12 @@ async function main() {
         process.exit(1);
     }
     const { config, repoRoot } = loadConfig(resolve(args.configPath));
+    const values = buildPlaceholderValues(args.version ?? "0.0.0");
+    const githubOutput = process.env.GITHUB_OUTPUT;
+    if (githubOutput) {
+        appendFileSync(githubOutput, `version=${values.version}\n`);
+        appendFileSync(githubOutput, `datetime=${values.datetime}\n`);
+    }
     await runPipeline({
         config,
         repoRoot,
