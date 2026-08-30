@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createServer } from "node:net";
 import { copyFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 function runCommand(command, args, cwd) {
@@ -42,9 +43,27 @@ function prepareDevAssets(cacheDir) {
         copyFileSync(infoSrc, infoDest);
     }
 }
+function findAvailablePort(host) {
+    return new Promise((resolve, reject) => {
+        const probe = createServer();
+        probe.listen(0, host, () => {
+            const address = probe.address();
+            const port = typeof address === "object" && address !== null ? address.port : 0;
+            probe.close((error) => {
+                if (error)
+                    reject(error);
+                else if (port > 0)
+                    resolve(port);
+                else
+                    reject(new Error("Failed to find an available port"));
+            });
+        });
+        probe.on("error", reject);
+    });
+}
 export async function startRmpServer(options) {
     const host = options.host ?? "127.0.0.1";
-    const port = 5173;
+    const port = await findAvailablePort(host);
     const cacheDir = join(options.cacheRoot, sanitizeRef(options.ref));
     if (!existsSync(cacheDir)) {
         await runCommand("git", [
