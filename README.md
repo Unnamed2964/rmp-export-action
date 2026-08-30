@@ -39,7 +39,7 @@ In the **calling** repository:
 - A `rmp-release.yml` next to it (paths in the config are relative to the config file's parent directory)
 - Optional shell hooks (Python scripts, etc.) referenced from the config
 
-On GitHub-hosted runners: `ubuntu-latest` is recommended (git, Node 24, native deps for sharp/resvg). The composite action installs git if missing.
+On GitHub-hosted runners: `ubuntu-latest` is recommended (git, Node 20, native deps for sharp/resvg).
 
 ## Usage
 

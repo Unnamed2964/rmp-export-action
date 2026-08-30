@@ -7,7 +7,7 @@ function runCommand(command, args, cwd) {
         const child = spawn(command, args, {
             cwd,
             stdio: "inherit",
-            shell: true,
+            shell: process.platform === "win32",
         });
         child.on("error", reject);
         child.on("close", (code) => {
@@ -86,7 +86,7 @@ export async function startRmpServer(options) {
     const dev = spawn("npm", ["run", "dev", "--", "--host", host, "--port", String(port), "--strictPort"], {
         cwd: cacheDir,
         stdio: "ignore",
-        shell: true,
+        shell: process.platform === "win32",
         detached: process.platform !== "win32",
     });
     const baseUrl = `http://${host}:${port}/rmp/`;

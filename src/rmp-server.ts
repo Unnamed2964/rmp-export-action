@@ -24,7 +24,7 @@ function runCommand(
     const child = spawn(command, args, {
       cwd,
       stdio: "inherit",
-      shell: true,
+      shell: process.platform === "win32",
     });
     child.on("error", reject);
     child.on("close", (code) => {
@@ -115,7 +115,7 @@ export async function startRmpServer(
     {
       cwd: cacheDir,
       stdio: "ignore",
-      shell: true,
+      shell: process.platform === "win32",
       detached: process.platform !== "win32",
     },
   );
