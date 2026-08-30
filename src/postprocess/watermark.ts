@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { Resvg } from "@resvg/resvg-js";
 import type { CropRect, WatermarkAnchor, WatermarkConfig } from "../config.js";
+import { resvgBaseOptions } from "../resvg-fonts.js";
 
 /** Inkscape-measured #rmp_info size (rmp-6.0.22). */
 const RMP_INFO_FALLBACK_SIZE = { width: 348.809, height: 52.115 };
@@ -84,7 +85,7 @@ export function measureRmpInfoBBox(svg: string): BBox | null {
 
   const mini = `<svg xmlns="http://www.w3.org/2000/svg">${element}</svg>`;
   try {
-    const raw = new Resvg(mini).getBBox();
+    const raw = new Resvg(mini, resvgBaseOptions()).getBBox();
     if (!raw) return null;
     const bbox = { x: raw.x, y: raw.y, width: raw.width, height: raw.height };
     return isValidBBox(bbox) ? bbox : null;

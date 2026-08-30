@@ -5,10 +5,6 @@
 # Playwright checks #agree_terms on your behalf at run time.
 acceptRmpExportTermsForRef: rmp-6.0.22
 
-placeholders:
-  version: "%version%"
-  datetime: "%datetime%"
-
 rmp:
   repository: https://github.com/railmapgen/rmp.git
   ref: rmp-6.0.22

@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";
+import { resvgBaseOptions } from "../resvg-fonts.js";
 function withWhiteBackground(svg) {
     if (/<rect[^>]*id="rmp-export-bg"/.test(svg))
         return svg;
@@ -12,6 +13,7 @@ export async function rasterizeSvg(options) {
         svg = withWhiteBackground(svg);
     }
     const resvg = new Resvg(svg, {
+        ...resvgBaseOptions(),
         fitTo: { mode: "zoom", value: options.scale },
         background: options.whiteBackground ? "white" : undefined,
     });

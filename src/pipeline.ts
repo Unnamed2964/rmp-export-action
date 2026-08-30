@@ -109,7 +109,11 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
         });
       }
 
-      console.log(`done: ${target.id} -> ${target.outputs.svg}`);
+      console.log(
+        `done: ${target.id} -> ${Object.entries(target.outputs)
+          .map(([format, path]) => `${format}: ${path}`)
+          .join(", ")}`,
+      );
     }
   } finally {
     server.stop();

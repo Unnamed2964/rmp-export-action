@@ -79,7 +79,9 @@ export async function runPipeline(options) {
                     format: "webp",
                 });
             }
-            console.log(`done: ${target.id} -> ${target.outputs.svg}`);
+            console.log(`done: ${target.id} -> ${Object.entries(target.outputs)
+                .map(([format, path]) => `${format}: ${path}`)
+                .join(", ")}`);
         }
     }
     finally {

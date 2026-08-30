@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";
+import { resvgBaseOptions } from "../resvg-fonts.js";
 
 export interface RasterizeOptions {
   svgPath: string;
@@ -25,6 +26,7 @@ export async function rasterizeSvg(options: RasterizeOptions): Promise<void> {
   }
 
   const resvg = new Resvg(svg, {
+    ...resvgBaseOptions(),
     fitTo: { mode: "zoom", value: options.scale },
     background: options.whiteBackground ? "white" : undefined,
   });

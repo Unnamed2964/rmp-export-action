@@ -58,7 +58,7 @@ On GitHub-hosted runners: `ubuntu-latest` is recommended (git, Node 20, native d
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `version` | yes | — | Substituted into `%version%` in JSON and placeholders |
+| `version` | yes | — | Substituted into `%version%` in `RMP.json` (and `%datetime%` from run time) |
 | `config` | no | `rmp-release.yml` | Path to release config (relative to repo root) |
 | `export-id` | no | — | Run a single export target from `exports` |
 | `dry-run` | no | `false` | Log plan without exporting |
@@ -79,10 +79,6 @@ The action writes files to paths declared in `rmp-release.yml` (e.g. `RMP.svg`, 
 Minimal shape:
 
 ```yaml
-placeholders:
-  version: "%version%"
-  datetime: "%datetime%"
-
 acceptRmpExportTermsForRef: rmp-6.0.22   # required — must match rmp.ref
 
 rmp:
