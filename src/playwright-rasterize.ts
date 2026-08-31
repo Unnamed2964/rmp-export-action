@@ -29,12 +29,26 @@ function parseSvgDimensions(svg: string): { width: number; height: number } {
   return { width, height };
 }
 
+async function isolatePageForRasterize(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document
+      .querySelectorAll('[role="dialog"], .chakra-modal__overlay, .chakra-modal__content-container')
+      .forEach((node) => node.remove());
+    const root = document.getElementById("root");
+    if (root) {
+      root.style.setProperty("visibility", "hidden", "important");
+    }
+  });
+}
+
 async function mountSvgInPage(
   page: Page,
   svg: string,
   whiteBackground: boolean,
-): Promise<{ width: number; height: number }> {
+): Promise<void> {
   const { width, height } = parseSvgDimensions(svg);
+
+  await isolatePageForRasterize(page);
 
   await page.evaluate(
     ({ hostId, svgContent, whiteBackground, width, height }) => {
@@ -51,6 +65,8 @@ async function mountSvgInPage(
         "padding:0",
         "overflow:hidden",
         "line-height:0",
+        "z-index:2147483647",
+        "isolation:isolate",
         `width:${width}px`,
         `height:${height}px`,
         whiteBackground ? "background:#ffffff" : "background:transparent",
@@ -61,6 +77,10 @@ async function mountSvgInPage(
       const root = doc.documentElement;
       if (root.querySelector("parsererror")) {
         throw new Error("Invalid SVG for in-page rasterization");
+      }
+
+      if (root.id === "canvas") {
+        root.id = "rmp-export-canvas";
       }
 
       const imported = document.importNode(root, true);
@@ -79,13 +99,15 @@ async function mountSvgInPage(
   await page.waitForFunction(() => document.fonts.ready, undefined, {
     timeout: 120_000,
   });
-
-  return { width, height };
 }
 
 async function unmountSvgFromPage(page: Page): Promise<void> {
   await page.evaluate((hostId) => {
     document.getElementById(hostId)?.remove();
+    const root = document.getElementById("root");
+    if (root) {
+      root.style.removeProperty("visibility");
+    }
   }, RASTER_HOST_ID);
 }
 
@@ -98,12 +120,10 @@ export async function rasterizeSvgInPage(
   try {
     await mountSvgInPage(options.page, svg, options.whiteBackground);
 
-    const png = await options.page
-      .locator(`#${RASTER_HOST_ID} svg`)
-      .screenshot({
-        type: "png",
-        omitBackground: !options.whiteBackground,
-      });
+    const png = await options.page.locator(`#${RASTER_HOST_ID}`).screenshot({
+      type: "png",
+      omitBackground: !options.whiteBackground,
+    });
 
     await sharp(png).webp().toFile(options.outputPath);
   } finally {

@@ -111,6 +111,18 @@ export async function downloadSvgExport(
 
   mkdirSync(dirname(outputPath), { recursive: true });
   await download.saveAs(outputPath);
+  await dismissExportDialog(page);
+}
+
+export async function dismissExportDialog(page: Page): Promise<void> {
+  for (let i = 0; i < 3; i += 1) {
+    await page.keyboard.press("Escape");
+  }
+  await page
+    .locator('[role="dialog"]')
+    .first()
+    .waitFor({ state: "hidden", timeout: 10_000 })
+    .catch(() => undefined);
 }
 
 export async function failRmpSession(

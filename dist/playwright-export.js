@@ -78,6 +78,17 @@ export async function downloadSvgExport(page, outputPath) {
     const download = await downloadPromise;
     mkdirSync(dirname(outputPath), { recursive: true });
     await download.saveAs(outputPath);
+    await dismissExportDialog(page);
+}
+export async function dismissExportDialog(page) {
+    for (let i = 0; i < 3; i += 1) {
+        await page.keyboard.press("Escape");
+    }
+    await page
+        .locator('[role="dialog"]')
+        .first()
+        .waitFor({ state: "hidden", timeout: 10_000 })
+        .catch(() => undefined);
 }
 export async function failRmpSession(session, label) {
     await saveDebug(session.page, session.debugDir, label);

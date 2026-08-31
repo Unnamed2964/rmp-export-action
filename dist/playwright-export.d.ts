@@ -14,4 +14,5 @@ export interface RmpPlaywrightSession {
 export declare function openRmpSession(options: OpenRmpSessionOptions): Promise<RmpPlaywrightSession>;
 export declare function importMapJson(page: Page, jsonPath: string): Promise<void>;
 export declare function downloadSvgExport(page: Page, outputPath: string): Promise<void>;
+export declare function dismissExportDialog(page: Page): Promise<void>;
 export declare function failRmpSession(session: RmpPlaywrightSession, label: string): Promise<void>;
