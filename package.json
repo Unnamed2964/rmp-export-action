@@ -1,6 +1,6 @@
 {
   "name": "rmp-export-action",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "GitHub Action: export Rail Map Painter JSON to SVG/WebP",
   "type": "module",
   "bin": {
@@ -8,8 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "export": "node dist/cli.js",
-    "postinstall": "node scripts/fetch-fonts.mjs"
+    "export": "node dist/cli.js"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

@@ -1,6 +1,6 @@
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { chromium } from "playwright";
+import { chromium, } from "playwright";
 async function saveDebug(page, debugDir, label) {
     mkdirSync(debugDir, { recursive: true });
     const stamp = Date.now();
@@ -9,7 +9,40 @@ async function saveDebug(page, debugDir, label) {
         fullPage: true,
     });
 }
-async function importJson(page, jsonPath) {
+export async function openRmpSession(options) {
+    mkdirSync(options.debugDir, { recursive: true });
+    const browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({
+        acceptDownloads: true,
+        deviceScaleFactor: options.scale,
+    });
+    await context.tracing.start({ screenshots: true, snapshots: true });
+    const page = await context.newPage();
+    try {
+        await page.goto(options.baseUrl, { waitUntil: "networkidle", timeout: 120_000 });
+        await page.waitForFunction(() => document.fonts.ready, undefined, {
+            timeout: 120_000,
+        });
+    }
+    catch (error) {
+        await saveDebug(page, options.debugDir, "session-open-failure");
+        const tracePath = join(options.debugDir, `trace-${Date.now()}.zip`);
+        await context.tracing.stop({ path: tracePath });
+        await browser.close();
+        throw error;
+    }
+    return {
+        browser,
+        context,
+        page,
+        debugDir: options.debugDir,
+        close: async () => {
+            await context.tracing.stop().catch(() => undefined);
+            await browser.close();
+        },
+    };
+}
+export async function importMapJson(page, jsonPath) {
     const fileInput = page.getByTestId("file-upload");
     await fileInput.waitFor({ state: "attached", timeout: 120_000 });
     await fileInput.setInputFiles(jsonPath);
@@ -18,7 +51,7 @@ async function importJson(page, jsonPath) {
         .click();
     await page.locator("#canvas path").first().waitFor({ state: "attached", timeout: 120_000 });
 }
-async function exportSvg(page, outputPath) {
+export async function downloadSvgExport(page, outputPath) {
     await page.locator("#menu-button-download").click();
     await page
         .getByRole("menuitem", { name: /Export image|导出图片/i })
@@ -46,25 +79,8 @@ async function exportSvg(page, outputPath) {
     mkdirSync(dirname(outputPath), { recursive: true });
     await download.saveAs(outputPath);
 }
-export async function exportSvgViaPlaywright(options) {
-    mkdirSync(options.debugDir, { recursive: true });
-    const browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext({ acceptDownloads: true });
-    await context.tracing.start({ screenshots: true, snapshots: true });
-    const page = await context.newPage();
-    try {
-        await page.goto(options.baseUrl, { waitUntil: "networkidle", timeout: 120_000 });
-        await importJson(page, options.jsonPath);
-        await exportSvg(page, options.outputPath);
-    }
-    catch (error) {
-        await saveDebug(page, options.debugDir, "failure");
-        const tracePath = join(options.debugDir, `trace-${Date.now()}.zip`);
-        await context.tracing.stop({ path: tracePath });
-        throw error;
-    }
-    finally {
-        await context.tracing.stop().catch(() => undefined);
-        await browser.close();
-    }
+export async function failRmpSession(session, label) {
+    await saveDebug(session.page, session.debugDir, label);
+    const tracePath = join(session.debugDir, `trace-${Date.now()}.zip`);
+    await session.context.tracing.stop({ path: tracePath });
 }

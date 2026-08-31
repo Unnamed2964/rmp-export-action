@@ -2,5 +2,3 @@ node_modules/
 .tmp/
 .cache/
 *.log
-fonts/*.otf
-fonts/*.ttc

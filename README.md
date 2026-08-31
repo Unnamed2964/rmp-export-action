@@ -27,7 +27,7 @@ acceptRmpExportTermsForRef: rmp-6.0.22
 
 Export **fails** if `acceptRmpExportTermsForRef` is missing or differs from `rmp.ref`. Changing `rmp.ref` requires re-reading terms and updating this field. There is no bypass.
 
-Consumer repositories keep a `rmp-release.yml` at the root (see [`example/rmp-release.yml`](example/rmp-release.yml)). The action clones a pinned RMP release, runs it in dev mode, drives the UI with Playwright, then post-processes SVG (crop, watermark, hooks, rasterize).
+Consumer repositories keep a `rmp-release.yml` at the root (see [`example/rmp-release.yml`](example/rmp-release.yml)). The action clones a pinned RMP release, runs it in dev mode, drives the UI with Playwright, then post-processes SVG (crop, watermark, hooks) and rasterizes WebP in the same browser session.
 
 Repository: [Unnamed2964/rmp-export-action](https://github.com/Unnamed2964/rmp-export-action)
 
@@ -39,7 +39,7 @@ In the **calling** repository:
 - A `rmp-release.yml` next to it (paths in the config are relative to the config file's parent directory)
 - Optional shell hooks (Python scripts, etc.) referenced from the config
 
-On GitHub-hosted runners: `ubuntu-latest` is recommended (git, Node 20, native deps for sharp/resvg).
+On GitHub-hosted runners: `ubuntu-latest` is recommended (git, Node 20, Playwright Chromium).
 
 ## Usage
 
@@ -107,9 +107,11 @@ exports:
           run: python scripts/my_hook.py RMP.svg
 ```
 
-Output formats are determined by `exports[].outputs`: include `svg` and/or `webp` paths. WebP rasterization uses `defaults.scale` and `defaults.whiteBackground`.
+Output formats are determined by `exports[].outputs`: include `svg` and/or `webp` paths. WebP uses Playwright in the same RMP browser session as SVG export (after crop, watermark, and hooks), with `defaults.scale` as `deviceScaleFactor` and `defaults.whiteBackground` for the raster host.
 
-Pipeline order per export: RMP Playwright export → crop → measure watermark geometry (once) → watermark by inset → in-frame ensure → hooks → WebP rasterize.
+Pipeline order per export: RMP Playwright export → crop → measure watermark geometry (once) → watermark by inset → in-frame ensure → hooks → Playwright in-page rasterize → WebP.
+
+WebP fonts come from the pinned `rmp.ref` instance loaded in the browser session (RMP web fonts via HTTP). OS-only families in SVG (e.g. SimHei, PingFang SC) may differ between CI and local Windows.
 
 Pin `rmp.ref` to a tag or branch you have tested (UI selectors depend on RMP version).
 

@@ -3,8 +3,13 @@ import { join } from "node:path";
 import type { ReleaseConfig } from "./config.js";
 import { resolveRepoPath } from "./config.js";
 import { buildPlaceholderValues, prepareJsonWithPlaceholders } from "./placeholders.js";
-import { exportSvgViaPlaywright } from "./playwright-export.js";
-import { rasterizeSvg } from "./postprocess/rasterize.js";
+import {
+  downloadSvgExport,
+  failRmpSession,
+  importMapJson,
+  openRmpSession,
+} from "./playwright-export.js";
+import { rasterizeSvgInPage } from "./playwright-rasterize.js";
 import { applyCropToSvg, parseViewBoxFromFile } from "./postprocess/viewbox.js";
 import {
   applyWatermark,
@@ -69,12 +74,20 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
       const svgOutput = resolveRepoPath(repoRoot, target.outputs.svg);
 
       console.log(`export: ${target.id} via RMP`);
-      await exportSvgViaPlaywright({
+      const session = await openRmpSession({
         baseUrl: server.baseUrl,
-        jsonPath: preparedJson,
-        outputPath: rawSvg,
         debugDir,
+        scale: config.defaults.scale,
       });
+
+      try {
+        await importMapJson(session.page, preparedJson);
+        await downloadSvgExport(session.page, rawSvg);
+      } catch (error) {
+        await failRmpSession(session, "export-failure");
+        await session.close();
+        throw error;
+      }
 
       copyFileSync(rawSvg, svgOutput);
 
@@ -100,14 +113,21 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
       }
 
       if (target.outputs.webp) {
-        await rasterizeSvg({
-          svgPath: svgOutput,
-          outputPath: resolveRepoPath(repoRoot, target.outputs.webp),
-          scale: config.defaults.scale,
-          whiteBackground: config.defaults.whiteBackground,
-          format: "webp",
-        });
+        console.log(`rasterize: ${target.id} via Playwright`);
+        try {
+          await rasterizeSvgInPage({
+            page: session.page,
+            svgPath: svgOutput,
+            outputPath: resolveRepoPath(repoRoot, target.outputs.webp),
+            whiteBackground: config.defaults.whiteBackground,
+          });
+        } catch (error) {
+          await failRmpSession(session, "rasterize-failure");
+          throw error;
+        }
       }
+
+      await session.close();
 
       console.log(
         `done: ${target.id} -> ${Object.entries(target.outputs)
