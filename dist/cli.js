@@ -5,7 +5,7 @@ import { loadConfig } from "./config.js";
 import { buildPlaceholderValues } from "./placeholders.js";
 import { runPipeline } from "./pipeline.js";
 function parseArgs(argv) {
-    let configPath = "rmp-release.yml";
+    let configPath = "rmp-release-config.yml";
     let version;
     let exportId;
     let dryRun = false;
@@ -34,7 +34,7 @@ function printHelp() {
     console.log(`Usage: rmp-export [options]
 
 Options:
-  --config <path>     Path to rmp-release.yml (default: rmp-release.yml)
+  --config <path>     Path to rmp-release-config.yml (default: rmp-release-config.yml)
   --version <ver>     Version string, e.g. 0.6.3 or v0.6.3
   --export-id <id>    Export only one target from config
   --dry-run           Print planned actions without exporting

@@ -11,7 +11,7 @@ function parseArgs(argv: string[]): {
   exportId?: string;
   dryRun: boolean;
 } {
-  let configPath = "rmp-release.yml";
+  let configPath = "rmp-release-config.yml";
   let version: string | undefined;
   let exportId: string | undefined;
   let dryRun = false;
@@ -39,7 +39,7 @@ function printHelp(): void {
   console.log(`Usage: rmp-export [options]
 
 Options:
-  --config <path>     Path to rmp-release.yml (default: rmp-release.yml)
+  --config <path>     Path to rmp-release-config.yml (default: rmp-release-config.yml)
   --version <ver>     Version string, e.g. 0.6.3 or v0.6.3
   --export-id <id>    Export only one target from config
   --dry-run           Print planned actions without exporting

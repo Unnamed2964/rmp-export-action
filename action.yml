@@ -1,12 +1,12 @@
 name: RMP Export
-description: Export Rail Map Painter project JSON to SVG and WebP using a rmp-release.yml config.
+description: Export Rail Map Painter project JSON to SVG and WebP using an rmp-release-config.yml config.
 author: Unnamed2964
 
 inputs:
   config:
-    description: Path to rmp-release.yml (relative to the calling repository root)
+    description: Path to rmp-release-config.yml (relative to the calling repository root)
     required: false
-    default: rmp-release.yml
+    default: rmp-release-config.yml
   version:
     description: Release version substituted into %version% placeholders (e.g. 0.6.3 or v0.6.3)
     required: true

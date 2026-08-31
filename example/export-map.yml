@@ -1,4 +1,5 @@
-# Example consumer workflow — copy to .github/workflows/ in your map repository.
+# Example consumer workflow — copy to .github/workflows/export-map.yml in your map repository.
+# For tag-triggered GitHub Releases (recommended), see release.yml.
 
 name: Export map
 
@@ -18,7 +19,7 @@ jobs:
       - name: Export via RMP
         uses: Unnamed2964/rmp-export-action@v0
         with:
-          config: rmp-release.yml
+          config: rmp-release-config.yml
           version: ${{ inputs.version }}
 
       - name: Upload artifacts
