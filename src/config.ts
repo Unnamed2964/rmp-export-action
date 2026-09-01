@@ -37,7 +37,7 @@ export interface ExportTarget {
   outputs: Record<string, string>;
   /** Playwright deviceScaleFactor for this export; overrides defaults. */
   scale?: number;
-  /** WebP background for this export; overrides defaults. */
+  /** Raster background for this export; overrides defaults. */
   whiteBackground?: boolean;
   postProcess?: { hooks?: PostProcessHook[] };
   crop?: CropRect;
@@ -61,7 +61,7 @@ const BUILTIN_SCALE = 2.0;
 const BUILTIN_WHITE_BACKGROUND = true;
 
 export function exportHasPersistedOutput(outputs: Record<string, string>): boolean {
-  return Boolean(outputs.svg || outputs.webp);
+  return Boolean(outputs.svg || outputs.webp || outputs.png);
 }
 
 export function resolveExportScale(
@@ -116,7 +116,7 @@ export function loadConfig(configPath: string): {
     if (entry.skip) continue;
     if (!exportHasPersistedOutput(entry.outputs ?? {})) {
       throw new Error(
-        `${label}: exports entry "${entry.id}" must set at least one of outputs.svg or outputs.webp`,
+        `${label}: exports entry "${entry.id}" must set at least one of outputs.svg, outputs.webp, or outputs.png`,
       );
     }
   }

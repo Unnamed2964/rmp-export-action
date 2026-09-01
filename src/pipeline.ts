@@ -28,6 +28,8 @@ import {
 import { runHookCommand } from "./exec-tool.js";
 import { startRmpServer } from "./rmp-server.js";
 
+const RASTER_OUTPUT_KEYS = ["webp", "png"] as const;
+
 export interface PipelineOptions {
   config: ReleaseConfig;
   repoRoot: string;
@@ -133,18 +135,24 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
       }
 
       if (target.outputs.svg) {
-        persistFile(workSvg, resolveRepoPath(repoRoot, target.outputs.svg));
+        persistFile(
+          workSvg,
+          resolveRepoPath(repoRoot, target.outputs.svg),
+        );
       }
 
-      if (target.outputs.webp) {
-        console.log(`rasterize: ${target.id} via Playwright`);
-        const webpDest = resolveRepoPath(repoRoot, target.outputs.webp);
-        mkdirSync(dirname(webpDest), { recursive: true });
+      for (const format of RASTER_OUTPUT_KEYS) {
+        const relPath = target.outputs[format];
+        if (!relPath) continue;
+
+        console.log(`rasterize: ${target.id} -> ${format} via Playwright`);
+        const dest = resolveRepoPath(repoRoot, relPath);
+        mkdirSync(dirname(dest), { recursive: true });
         try {
           await rasterizeSvgInPage({
             page: session.page,
             svgPath: workSvg,
-            outputPath: webpDest,
+            outputPath: dest,
             whiteBackground,
           });
         } catch (error) {

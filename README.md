@@ -9,9 +9,9 @@
 
 > 以下部分内容由 Cursor Auto 生成，但经过人工检查和修改
 
-GitHub Action 与 CLI，用于将 [Rail Map Painter](https://github.com/railmapgen/rmp) 项目 JSON 自动化地导出为 SVG 与 WebP，并用于组成更大的自动化过程。
+GitHub Action 与 CLI，用于将 [Rail Map Painter](https://github.com/railmapgen/rmp) 项目 JSON 自动化地导出为 SVG、WebP 或 PNG，并用于组成更大的自动化过程。
 
-本 Action 克隆指定版本的 RMP 并在浏览器中启动，通过 Playwright 代为操作导出界面，再对 SVG 做裁剪、水印移动、自定义脚本等后处理，然后生成 WebP。
+本 Action 克隆指定版本的 RMP 并在浏览器中启动，通过 Playwright 代为操作导出界面，再对 SVG 做裁剪、水印移动、自定义脚本等后处理，然后按需生成 WebP 或 PNG。
 
 > [!WARNING]
 >
@@ -30,7 +30,7 @@ GitHub Action 与 CLI，用于将 [Rail Map Painter](https://github.com/railmapg
 3. 下载 [`example/release.yml`](example/release.yml) 并复制到仓库下的 `.github/workflows/release.yml`。
 4. 提交并推送更改至 GitHub。
 5. 在本地创建并推送语义化版本号标签，例如 `git tag v0.1.0 && git push origin v0.1.0`（根据你需要的版本号修改）。含 `v` 前缀的版本号将会被写进 RMP 存档中的 `%version%` 占位符。
-6. workflow 运行成功后，到仓库 **Releases** 页面（你可在仓库主页右栏找到）查看新版本；此时可以在附件中下载 SVG 和 WebP，也可以在发布正文中看到导出的 WebP 图。
+6. workflow 运行成功后，到仓库 **Releases** 页面（你可在仓库主页右栏找到）查看新版本；此时可以在附件中下载 SVG、WebP 或 PNG，也可以在发布正文中看到导出的位图。
 
 ## 参数
 
@@ -74,7 +74,7 @@ rmp:
 defaults:
   # scale: Playwright 设备缩放倍数，影响该次导出会话的渲染与 WebP 分辨率
   scale: 2.0
-  # whiteBackground: 生成 WebP 时为 true 则白色背景，否则透明背景
+  # whiteBackground: 生成 WebP/PNG 时为 true 则白色背景，否则透明背景
   whiteBackground: true
 
 # exports: 导出目标列表；每条对应一个 source 与一组输出文件
@@ -87,12 +87,14 @@ exports:
     # scale / whiteBackground: 可选；覆盖 defaults，适合多张画幅不同的线路图
     # scale: 2.5
     # whiteBackground: false
-    # outputs: 导出文件在 workflow 中的路径；至少填写 svg 或 webp 之一
+    # outputs: 导出文件在 workflow 中的路径；至少填写 svg、webp、png 之一
     outputs:
       # svg: 可选；省略则 SVG 仅作中间产物，不写入仓库
       svg: RMP.svg
       # webp: 可选；省略则不生成 WebP
       webp: RMP.webp
+      # png: 可选；省略则不生成 PNG
+      # png: RMP.png
     # crop: 可选；若存在则将输出进行裁剪，坐标系为 RMP 坐标系
     # 你可以在 RMP 中把新建车站或虚拟节点移到打算作为裁剪区左上角和右下角的位置，记下它们的坐标来确认以下数值
     crop:
@@ -141,7 +143,7 @@ exports:
 | `Timed out waiting for` RMP URL | 克隆或安装太慢，或者 `rmp.ref` 无效 | 在仓库 **Actions** 页打开失败运行，查看日志；核对 `rmp.ref` 是否拼写正确、该 tag 在 RMP 仓库是否存在 |
 | Playwright 超时 / `session-open-failure` | RMP 启动或加载出问题 | 同上查看 Actions 日志；确认 `rmp.ref` 有效。也有可能本 Action 暂不支持该 RMP 版本，可前往 [Issues](https://github.com/Unnamed2964/rmp-export-action/issues) 反馈 |
 | `export-failure` | SVG 导出时 RMP 界面操作失败 | 本工具基于 RMP 6.0.22 开发，不一定支持未来的 RMP 版本；若刚升级 `rmp.ref`，可先改回之前的版本号，并可前往 [Issues](https://github.com/Unnamed2964/rmp-export-action/issues) 反馈 |
-| `rasterize-failure` / `SVG missing viewBox and width/height` | SVG 转 WebP 失败 | 核对 `crop` 坐标是否合理；可暂时去掉 `crop` 试一次 |
+| `rasterize-failure` / `SVG missing viewBox and width/height` | SVG 转 WebP/PNG 失败 | 核对 `crop` 坐标是否合理；可暂时去掉 `crop` 试一次 |
 | `Unknown watermark anchor` / `watermark requires absolute or anchor+inset` | watermark 配置无效 | 检查 `watermark` 写法 |
 | CI 输出与本地 Windows 不一致 | **已知问题**（[#1](https://github.com/Unnamed2964/rmp-export-action/issues/1)）：CI 与 Windows 可用字体不同，中文排版可能与本地 RMP 预览不一样 | 以 Release 附件中的 SVG/WebP 为准；详情与背景见 [#1](https://github.com/Unnamed2964/rmp-export-action/issues/1) |
 | Release / Artifacts 缺少附件 | upload 步骤或路径配错了 | 对照 [`example/release.yml`](example/release.yml) 或 [`example/export-map.yml`](example/export-map.yml) 检查 workflow 里的上传路径 |
@@ -163,7 +165,7 @@ postProcess:
       run: python3 scripts/adjust_zh_dy.py RMP.svg
 ```
 
-同一导出目标若同时配置 `outputs.webp`，上述修改会反映在随后生成的 WebP 中。
+同一导出目标若同时配置 `outputs.webp` 或 `outputs.png`，上述修改会反映在随后生成的位图中。
 
 ### 水印的绝对定位
 
@@ -200,9 +202,9 @@ flowchart LR
   frame[in_frame_ensure]
   hooks[hooks]
   raster[Playwright_rasterize]
-  webp[WebP]
+  rasterOut[WebP_or_PNG]
 
-  export --> crop --> measure --> wm --> frame --> hooks --> raster --> webp
+  export --> crop --> measure --> wm --> frame --> hooks --> raster --> rasterOut
 ```
 
 ### 其他 workflow 示例

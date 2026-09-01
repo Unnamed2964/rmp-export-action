@@ -4,7 +4,7 @@ import { parse } from "yaml";
 const BUILTIN_SCALE = 2.0;
 const BUILTIN_WHITE_BACKGROUND = true;
 export function exportHasPersistedOutput(outputs) {
-    return Boolean(outputs.svg || outputs.webp);
+    return Boolean(outputs.svg || outputs.webp || outputs.png);
 }
 export function resolveExportScale(target, defaults) {
     return target.scale ?? defaults?.scale ?? BUILTIN_SCALE;
@@ -39,7 +39,7 @@ export function loadConfig(configPath) {
         if (entry.skip)
             continue;
         if (!exportHasPersistedOutput(entry.outputs ?? {})) {
-            throw new Error(`${label}: exports entry "${entry.id}" must set at least one of outputs.svg or outputs.webp`);
+            throw new Error(`${label}: exports entry "${entry.id}" must set at least one of outputs.svg, outputs.webp, or outputs.png`);
         }
     }
     return { config, repoRoot: resolve(absolute, "..") };

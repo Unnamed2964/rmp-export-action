@@ -8,6 +8,7 @@ import { applyCropToSvg, parseViewBoxFromFile } from "./postprocess/viewbox.js";
 import { applyWatermark, ensureWatermarkInFrame, measureRmpInfoGeometry, } from "./postprocess/watermark.js";
 import { runHookCommand } from "./exec-tool.js";
 import { startRmpServer } from "./rmp-server.js";
+const RASTER_OUTPUT_KEYS = ["webp", "png"];
 function resolveHookCommand(run, svgPath) {
     return run.replace(/\bRMP\.svg\b/g, svgPath);
 }
@@ -87,15 +88,18 @@ export async function runPipeline(options) {
             if (target.outputs.svg) {
                 persistFile(workSvg, resolveRepoPath(repoRoot, target.outputs.svg));
             }
-            if (target.outputs.webp) {
-                console.log(`rasterize: ${target.id} via Playwright`);
-                const webpDest = resolveRepoPath(repoRoot, target.outputs.webp);
-                mkdirSync(dirname(webpDest), { recursive: true });
+            for (const format of RASTER_OUTPUT_KEYS) {
+                const relPath = target.outputs[format];
+                if (!relPath)
+                    continue;
+                console.log(`rasterize: ${target.id} -> ${format} via Playwright`);
+                const dest = resolveRepoPath(repoRoot, relPath);
+                mkdirSync(dirname(dest), { recursive: true });
                 try {
                     await rasterizeSvgInPage({
                         page: session.page,
                         svgPath: workSvg,
-                        outputPath: webpDest,
+                        outputPath: dest,
                         whiteBackground,
                     });
                 }

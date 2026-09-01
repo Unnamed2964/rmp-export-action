@@ -1,8 +1,10 @@
-import { mkdirSync, readFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, extname } from "node:path";
 import type { Page } from "playwright";
 import sharp from "sharp";
 import { parseViewBox } from "./postprocess/viewbox.js";
+
+export type RasterFormat = "webp" | "png";
 
 export interface PlaywrightRasterizeOptions {
   page: Page;
@@ -12,6 +14,15 @@ export interface PlaywrightRasterizeOptions {
 }
 
 const RASTER_HOST_ID = "rmp-export-raster-host";
+
+export function rasterFormatFromPath(outputPath: string): RasterFormat {
+  const ext = extname(outputPath).toLowerCase();
+  if (ext === ".webp") return "webp";
+  if (ext === ".png") return "png";
+  throw new Error(
+    `Unsupported raster output extension "${ext}" (use .webp or .png): ${outputPath}`,
+  );
+}
 
 function parseSvgDimensions(svg: string): { width: number; height: number } {
   const viewBox = parseViewBox(svg);
@@ -125,7 +136,12 @@ export async function rasterizeSvgInPage(
       omitBackground: !options.whiteBackground,
     });
 
-    await sharp(png).webp().toFile(options.outputPath);
+    const format = rasterFormatFromPath(options.outputPath);
+    if (format === "png") {
+      writeFileSync(options.outputPath, png);
+    } else {
+      await sharp(png).webp().toFile(options.outputPath);
+    }
   } finally {
     await unmountSvgFromPage(options.page);
   }

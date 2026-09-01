@@ -30,7 +30,7 @@ export interface ExportTarget {
     outputs: Record<string, string>;
     /** Playwright deviceScaleFactor for this export; overrides defaults. */
     scale?: number;
-    /** WebP background for this export; overrides defaults. */
+    /** Raster background for this export; overrides defaults. */
     whiteBackground?: boolean;
     postProcess?: {
         hooks?: PostProcessHook[];
