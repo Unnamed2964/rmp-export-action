@@ -1,6 +1,16 @@
 import { readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import { parse } from "yaml";
+const BUILTIN_SCALE = 2.0;
+const BUILTIN_WHITE_BACKGROUND = true;
+export function resolveExportScale(target, defaults) {
+    return target.scale ?? defaults?.scale ?? BUILTIN_SCALE;
+}
+export function resolveExportWhiteBackground(target, defaults) {
+    return (target.whiteBackground ??
+        defaults?.whiteBackground ??
+        BUILTIN_WHITE_BACKGROUND);
+}
 export function loadConfig(configPath) {
     const absolute = resolve(configPath);
     const raw = readFileSync(absolute, "utf-8");

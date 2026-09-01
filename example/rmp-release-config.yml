@@ -16,6 +16,8 @@ defaults:
 exports:
   - id: map
     source: RMP.json
+    # scale: 2.5
+    # whiteBackground: false
     outputs:
       svg: RMP.svg
       webp: RMP.webp

@@ -1,7 +1,11 @@
 import { copyFileSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import type { ReleaseConfig } from "./config.js";
-import { resolveRepoPath } from "./config.js";
+import {
+  resolveExportScale,
+  resolveExportWhiteBackground,
+  resolveRepoPath,
+} from "./config.js";
 import { buildPlaceholderValues, prepareJsonWithPlaceholders } from "./placeholders.js";
 import {
   downloadSvgExport,
@@ -73,11 +77,17 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
       const rawSvg = join(tmpDir, `${target.id}.raw.svg`);
       const svgOutput = resolveRepoPath(repoRoot, target.outputs.svg);
 
-      console.log(`export: ${target.id} via RMP`);
+      const scale = resolveExportScale(target, config.defaults);
+      const whiteBackground = resolveExportWhiteBackground(
+        target,
+        config.defaults,
+      );
+
+      console.log(`export: ${target.id} via RMP (scale ${scale})`);
       const session = await openRmpSession({
         baseUrl: server.baseUrl,
         debugDir,
-        scale: config.defaults.scale,
+        scale,
       });
 
       try {
@@ -119,7 +129,7 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
             page: session.page,
             svgPath: svgOutput,
             outputPath: resolveRepoPath(repoRoot, target.outputs.webp),
-            whiteBackground: config.defaults.whiteBackground,
+            whiteBackground,
           });
         } catch (error) {
           await failRmpSession(session, "rasterize-failure");

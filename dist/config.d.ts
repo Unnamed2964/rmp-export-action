@@ -20,10 +20,18 @@ export interface PostProcessHook {
     type: "command";
     run: string;
 }
+export interface RasterDefaults {
+    scale?: number;
+    whiteBackground?: boolean;
+}
 export interface ExportTarget {
     id: string;
     source: string;
     outputs: Record<string, string>;
+    /** Playwright deviceScaleFactor for this export; overrides defaults. */
+    scale?: number;
+    /** WebP background for this export; overrides defaults. */
+    whiteBackground?: boolean;
     postProcess?: {
         hooks?: PostProcessHook[];
     };
@@ -38,12 +46,12 @@ export interface ReleaseConfig {
         repository: string;
         ref: string;
     };
-    defaults: {
-        scale: number;
-        whiteBackground: boolean;
-    };
+    /** Optional fallbacks when an export omits scale or whiteBackground. */
+    defaults?: RasterDefaults;
     exports: ExportTarget[];
 }
+export declare function resolveExportScale(target: ExportTarget, defaults?: RasterDefaults): number;
+export declare function resolveExportWhiteBackground(target: ExportTarget, defaults?: RasterDefaults): boolean;
 export declare function loadConfig(configPath: string): {
     config: ReleaseConfig;
     repoRoot: string;
