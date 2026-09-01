@@ -87,10 +87,11 @@ exports:
     # scale / whiteBackground: Optional per-export overrides (e.g. different maps with different canvas sizes)
     # scale: 2.5
     # whiteBackground: false
-    # outputs: Output file paths in the workflow
+    # outputs: Output file paths in the workflow; set at least one of svg or webp
     outputs:
-      # Both entries below are optional
+      # svg: Optional; omit to keep SVG as an internal intermediate only
       svg: RMP.svg
+      # webp: Optional; omit to skip WebP generation
       webp: RMP.webp
     # crop: Optional; when present, crops the output using RMP coordinates
     # In RMP, move new stations or virtual nodes to the intended top-left and bottom-right corners of the crop region, note their coordinates, and use them to fill in the values below

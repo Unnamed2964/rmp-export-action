@@ -50,6 +50,7 @@ export interface ReleaseConfig {
     defaults?: RasterDefaults;
     exports: ExportTarget[];
 }
+export declare function exportHasPersistedOutput(outputs: Record<string, string>): boolean;
 export declare function resolveExportScale(target: ExportTarget, defaults?: RasterDefaults): number;
 export declare function resolveExportWhiteBackground(target: ExportTarget, defaults?: RasterDefaults): boolean;
 export declare function loadConfig(configPath: string): {

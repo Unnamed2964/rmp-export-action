@@ -87,10 +87,11 @@ exports:
     # scale / whiteBackground: 可选；覆盖 defaults，适合多张画幅不同的线路图
     # scale: 2.5
     # whiteBackground: false
-    # outputs: 导出文件在 workflow 中的路径
+    # outputs: 导出文件在 workflow 中的路径；至少填写 svg 或 webp 之一
     outputs:
-      # 以下两项均可选
+      # svg: 可选；省略则 SVG 仅作中间产物，不写入仓库
       svg: RMP.svg
+      # webp: 可选；省略则不生成 WebP
       webp: RMP.webp
     # crop: 可选；若存在则将输出进行裁剪，坐标系为 RMP 坐标系
     # 你可以在 RMP 中把新建车站或虚拟节点移到打算作为裁剪区左上角和右下角的位置，记下它们的坐标来确认以下数值

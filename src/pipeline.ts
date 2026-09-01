@@ -1,5 +1,10 @@
-import { copyFileSync, mkdirSync, readFileSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import {
+  copyFileSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+} from "node:fs";
+import { dirname, join } from "node:path";
 import type { ReleaseConfig } from "./config.js";
 import {
   resolveExportScale,
@@ -31,8 +36,13 @@ export interface PipelineOptions {
   dryRun?: boolean;
 }
 
-function resolveHookCommand(run: string, svgOutput: string): string {
-  return run.replace(/\bRMP\.svg\b/g, svgOutput);
+function resolveHookCommand(run: string, svgPath: string): string {
+  return run.replace(/\bRMP\.svg\b/g, svgPath);
+}
+
+function persistFile(source: string, dest: string): void {
+  mkdirSync(dirname(dest), { recursive: true });
+  copyFileSync(source, dest);
 }
 
 export async function runPipeline(options: PipelineOptions): Promise<void> {
@@ -75,7 +85,7 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
       prepareJsonWithPlaceholders(sourcePath, preparedJson, values);
 
       const rawSvg = join(tmpDir, `${target.id}.raw.svg`);
-      const svgOutput = resolveRepoPath(repoRoot, target.outputs.svg);
+      const workSvg = join(tmpDir, `${target.id}.svg`);
 
       const scale = resolveExportScale(target, config.defaults);
       const whiteBackground = resolveExportWhiteBackground(
@@ -99,36 +109,42 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
         throw error;
       }
 
-      copyFileSync(rawSvg, svgOutput);
+      copyFileSync(rawSvg, workSvg);
 
       if (target.crop) {
-        applyCropToSvg(svgOutput, target.crop);
+        applyCropToSvg(workSvg, target.crop);
       }
 
-      const frame = target.crop ?? parseViewBoxFromFile(svgOutput);
+      const frame = target.crop ?? parseViewBoxFromFile(workSvg);
       if (target.watermark && frame) {
-        const svgText = readFileSync(svgOutput, "utf-8");
+        const svgText = readFileSync(workSvg, "utf-8");
         const geometry = /id="rmp_info"/.test(svgText)
           ? measureRmpInfoGeometry(svgText)
           : null;
         if (geometry) {
-          applyWatermark(svgOutput, frame, target.watermark, geometry);
-          ensureWatermarkInFrame(svgOutput, frame, geometry);
+          applyWatermark(workSvg, frame, target.watermark, geometry);
+          ensureWatermarkInFrame(workSvg, frame, geometry);
         }
       }
 
       for (const hook of target.postProcess?.hooks ?? []) {
         if (hook.type !== "command") continue;
-        runHookCommand(resolveHookCommand(hook.run, svgOutput), repoRoot);
+        runHookCommand(resolveHookCommand(hook.run, workSvg), repoRoot);
+      }
+
+      if (target.outputs.svg) {
+        persistFile(workSvg, resolveRepoPath(repoRoot, target.outputs.svg));
       }
 
       if (target.outputs.webp) {
         console.log(`rasterize: ${target.id} via Playwright`);
+        const webpDest = resolveRepoPath(repoRoot, target.outputs.webp);
+        mkdirSync(dirname(webpDest), { recursive: true });
         try {
           await rasterizeSvgInPage({
             page: session.page,
-            svgPath: svgOutput,
-            outputPath: resolveRepoPath(repoRoot, target.outputs.webp),
+            svgPath: workSvg,
+            outputPath: webpDest,
             whiteBackground,
           });
         } catch (error) {
@@ -139,8 +155,9 @@ export async function runPipeline(options: PipelineOptions): Promise<void> {
 
       await session.close();
 
+      const written = Object.entries(target.outputs).filter(([, path]) => path);
       console.log(
-        `done: ${target.id} -> ${Object.entries(target.outputs)
+        `done: ${target.id} -> ${written
           .map(([format, path]) => `${format}: ${path}`)
           .join(", ")}`,
       );
