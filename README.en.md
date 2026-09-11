@@ -67,6 +67,7 @@ rmp:
   # Recommended: the RMP version you are currently using.
   # This repository does not guarantee that its UI automation will work with future RMP versions
   # If that happens, rolling back to a version this repository supports may be a temporary workaround
+  # Binary search between rmp-1.0.0 and rmp-6.0.22 found minimum workable ref rmp-5.3.2; see “RMP version compatibility”
   ref: rmp-6.0.22
 
 # defaults: Optional fallbacks for scale / whiteBackground when an export omits them
@@ -142,7 +143,7 @@ You can type `%version%` and `%datetime%` anywhere in your RMP archive (they may
 | `Hook failed: ...` | Post-process script failed | Check script paths under `postProcess` in `rmp-release-config.yml`; if you do not use hooks, remove any accidental `hooks` block |
 | `Timed out waiting for` RMP URL | Slow clone/install or invalid `rmp.ref` | On the repository **Actions** tab, open the failed run and read the log; check that `rmp.ref` is spelled correctly and that the tag exists on the RMP repository |
 | Playwright timeout / `session-open-failure` | RMP failed to start or load | Same as above — read the Actions log; confirm `rmp.ref` is valid. This action may not support that RMP version yet; report on [Issues](https://github.com/Unnamed2964/rmp-export-action/issues) |
-| `export-failure` | RMP UI error during SVG export | Automation was developed against RMP 6.0.22 and may not support future RMP versions; if you recently upgraded `rmp.ref`, roll back to the previous version and report on [Issues](https://github.com/Unnamed2964/rmp-export-action/issues) |
+| `export-failure` | RMP UI error during SVG export | Automation was developed against RMP 6.0.22; the automation floor is about `rmp-5.3.2` (see [RMP version compatibility](#rmp-version-compatibility)), and future RMP versions may still break; if you recently upgraded `rmp.ref`, roll back to the previous version and report on [Issues](https://github.com/Unnamed2964/rmp-export-action/issues) |
 | `rasterize-failure` / `SVG missing viewBox and width/height` | SVG-to-WebP/PNG conversion failed | Check whether `crop` coordinates look reasonable; try removing `crop` once to test |
 | `Unknown watermark anchor` / `watermark requires absolute or anchor+inset` | Invalid watermark config | Check your `watermark` configuration |
 | CI output differs from local Windows | **Known issue** ([#1](https://github.com/Unnamed2964/rmp-export-action/issues/1)): CI and Windows use different fonts, so Chinese layout may differ from local RMP preview | Treat SVG/WebP in the Release attachments as canonical; see [#1](https://github.com/Unnamed2964/rmp-export-action/issues/1) for background |
@@ -151,6 +152,10 @@ You can type `%version%` and `%datetime%` anywhere in your RMP archive (they may
 ## Advanced topics
 
 Details not covered above.
+
+### RMP version compatibility
+
+A binary search over `rmp-*` tags between `rmp-1.0.0` and `rmp-6.0.22` found that the **minimum workable version for this action’s current automation is `rmp-5.3.2`** (likely because that release added the DOM ids this tool depends on). Versions newer than the development pin (e.g. `rmp-6.0.22`) may also break. Full terminal log: [`docs/452419.txt`](docs/452419.txt).
 
 ### Post-process scripts
 

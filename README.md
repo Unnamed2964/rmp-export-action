@@ -67,6 +67,7 @@ rmp:
   # 建议填写你正在使用的 RMP 版本号。
   # 本仓库不保证采用的自动操作方式能够在将来的 RMP 版本中有效
   # 如果发生这种情况，回退到本仓库适配的版本可能可以作为临时措施
+  # 二分测试（rmp-1.0.0 … rmp-6.0.22）得到的最小可行版本为 rmp-5.3.2；详见下方「RMP 版本兼容性」
   ref: rmp-6.0.22
 
 # defaults: 可选；未在单条 exports 中指定的 scale / whiteBackground 使用此处值
@@ -142,7 +143,7 @@ exports:
 | `Hook failed: ...` | 后处理脚本运行失败 | 核对 `rmp-release-config.yml` 里 `postProcess` 的脚本路径；若未使用后处理，检查是否误加了 `hooks` |
 | `Timed out waiting for` RMP URL | 克隆或安装太慢，或者 `rmp.ref` 无效 | 在仓库 **Actions** 页打开失败运行，查看日志；核对 `rmp.ref` 是否拼写正确、该 tag 在 RMP 仓库是否存在 |
 | Playwright 超时 / `session-open-failure` | RMP 启动或加载出问题 | 同上查看 Actions 日志；确认 `rmp.ref` 有效。也有可能本 Action 暂不支持该 RMP 版本，可前往 [Issues](https://github.com/Unnamed2964/rmp-export-action/issues) 反馈 |
-| `export-failure` | SVG 导出时 RMP 界面操作失败 | 本工具基于 RMP 6.0.22 开发，不一定支持未来的 RMP 版本；若刚升级 `rmp.ref`，可先改回之前的版本号，并可前往 [Issues](https://github.com/Unnamed2964/rmp-export-action/issues) 反馈 |
+| `export-failure` | SVG 导出时 RMP 界面操作失败 | 本工具基于 RMP 6.0.22 开发；自动化兼容下界约为 `rmp-5.3.2`（见 [RMP 版本兼容性](#rmp-版本兼容性)），也不一定支持未来的 RMP 版本；若刚升级 `rmp.ref`，可先改回之前的版本号，并可前往 [Issues](https://github.com/Unnamed2964/rmp-export-action/issues) 反馈 |
 | `rasterize-failure` / `SVG missing viewBox and width/height` | SVG 转 WebP/PNG 失败 | 核对 `crop` 坐标是否合理；可暂时去掉 `crop` 试一次 |
 | `Unknown watermark anchor` / `watermark requires absolute or anchor+inset` | watermark 配置无效 | 检查 `watermark` 写法 |
 | CI 输出与本地 Windows 不一致 | **已知问题**（[#1](https://github.com/Unnamed2964/rmp-export-action/issues/1)）：CI 与 Windows 可用字体不同，中文排版可能与本地 RMP 预览不一样 | 以 Release 附件中的 SVG/WebP 为准；详情与背景见 [#1](https://github.com/Unnamed2964/rmp-export-action/issues/1) |
@@ -151,6 +152,10 @@ exports:
 ## 高级主题
 
 以下内容为前文未展开的细节。
+
+### RMP 版本兼容性
+
+在 `rmp-1.0.0` 与 `rmp-6.0.22` 之间对 `rmp-*` tag 做二分探测后，本 Action 当前自动化流水线的**最小可行版本为 `rmp-5.3.2`**（推测是由于本版本添加了本工具所依赖的一批 DOM id）。高于开发基准（如 `rmp-6.0.22`）的未来版本也可能失效。完整终端记录见 [`docs/452419.txt`](docs/452419.txt)。
 
 ### 后处理脚本
 
